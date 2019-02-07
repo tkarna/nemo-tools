@@ -7,7 +7,7 @@ import datetime
 import os
 
 
-def parse_iteration_count(infile='run.stat'):
+def parse_iteration_count_old(infile='run.stat'):
     """
     Parses last line from 'run.stat' file to determine current iteration count.
     """
@@ -16,6 +16,16 @@ def parse_iteration_count(infile='run.stat'):
         words = last_line.split()
         assert words[0] == 'it'
         niters = int(words[2])
+    return niters
+
+
+def parse_iteration_count(infile='time.step'):
+    """
+    Parses the int written in 'time.step' file.
+    """
+    with open(infile, 'r') as f:
+        line = f.readlines()[0]
+        niters = int(line)
     return niters
 
 
@@ -83,7 +93,7 @@ def process():
     tot_niter = parse_total_iter_count()
 
     # last modified time
-    last_update = get_file_mod_time('run.stat')
+    last_update = get_file_mod_time('time.step')
     time_changed = round((current_time - last_update).total_seconds())
 
     running = time_changed < 3*60.0
