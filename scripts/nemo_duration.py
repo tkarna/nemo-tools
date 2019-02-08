@@ -83,18 +83,19 @@ def process():
     # get sim start time
     start_time = get_file_mod_time('layout.dat')
 
-    # compute elapsed wallclock time
-    current_time = datetime.datetime.now()
-    duration = current_time - start_time
-    duration_sec = duration.total_seconds()
 
     niters = parse_iteration_count()
     timestep = parse_timestep()
     tot_niter = parse_total_iter_count()
 
     # last modified time
+    current_time = datetime.datetime.now()
     last_update = get_file_mod_time('time.step')
     time_changed = round((current_time - last_update).total_seconds())
+
+    # compute elapsed wallclock time
+    duration = last_update - start_time
+    duration_sec = duration.total_seconds()
 
     running = time_changed < 3*60.0
 
