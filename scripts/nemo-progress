@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Figure out NEMO simulation run speed and duration.
 

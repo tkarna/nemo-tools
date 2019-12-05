@@ -1,3 +1,7 @@
+#!/usr/bin/python
+"""
+Compare Nemo namelist parameters.
+"""
 from collections import defaultdict
 
 
