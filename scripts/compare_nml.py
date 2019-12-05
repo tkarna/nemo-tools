@@ -8,8 +8,9 @@ class F90NML(defaultdict):
     def __init__(self):
         """Initialize an empty namelist object"""
         super().__init__(dict)
-        self.comments = dict()
+        self.comments = defaultdict(dict)
         self.filename = None
+        self.source_line = defaultdict(dict)
 
     @classmethod
     def read(cls, file):
@@ -30,7 +31,6 @@ class F90NML(defaultdict):
                     comment = ''
                     if '!' in line:
                         comment = line.split('!', 1)[1].strip()
-                    new.comments[header] = comment
                     continue
                 if '=' in line:
                     param, b = line.split('=', 1)
@@ -42,7 +42,8 @@ class F90NML(defaultdict):
                         comment = c[1].strip()
                         value = c[0].strip()
                     new[header][param] = value
-                    new.comments[param] = comment
+                    new.comments[header][param] = comment
+                    new.source_line[header][param] = line
         return new
 
 
@@ -67,9 +68,11 @@ def flatten_nml(a):
     I.e. all parameters are grouped under a single header 'flat'
     """
     new_a = F90NML()
-    new_a.comments = dict(a.comments)
     new_a.filename = a.filename
-    new_a['flat'] = flatten_dict(a)
+    master_header = 'flat'
+    new_a.comments[master_header] = flatten_dict(a.comments)
+    new_a.source_line[master_header] = flatten_dict(a.source_line)
+    new_a[master_header] = flatten_dict(a)
     return new_a
 
 
@@ -94,11 +97,21 @@ def compare_nmls(a, b, flatten=False):
             return v
         return a[header][param]
 
+    def print_legend():
+        print('{:14} {:18}: {:24} {:24} {:}'.format(
+            '[Namelist]', '[Param]',
+            '[Value_A]',
+            '[Value_B]',
+            '[Comment]')
+        )
+
     def print_param(header, param, a, b):
-        if param in a.comments:
-            comment = a.comments[param]
+        if header in a.comments and param in a.comments[header]:
+            comment = a.comments[header][param]
+        elif header in b.comments:
+            comment = b.comments[header].get(param, '')
         else:
-            comment = b.comments.get(param, '')
+            comment = ''
         print('{:14} {:18}: {:24} {:24} "{:}"'.format(
             header, param,
             get_value(a, header, param),
@@ -148,6 +161,7 @@ def compare_nmls(a, b, flatten=False):
 
     def section(title, filter_func):
         print('\n{:}:\n'.format(title))
+        print_legend()
         for h in all_headers:
             all_params = set(h for h in list(a[h].keys()) + list(b[h].keys()))
             all_params = sorted(list(all_params))
@@ -180,7 +194,9 @@ if __name__ == '__main__':
         if cfg_file is not None:
             cfg_nml = F90NML.read(cfg_file)
             print('Add {:} to {:}'.format(cfg_nml.filename, nml.filename))
-            nml.update(cfg_nml)
+            for key in nml:
+                if key in cfg_nml:
+                    nml[key].update(cfg_nml[key])
 
     update_cfg(a, args.cfg_a)
     update_cfg(b, args.cfg_b)
