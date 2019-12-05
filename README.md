@@ -2,27 +2,54 @@
 
 Tools for Nemo ocean model
 
+## Installation
+
+```bash
+pip install -e <path-to-this-repository>
+```
 
 ## Examples
 
-Print Nemo simulation speed and duration on command line. Must be invoked in
-the simulation run directory.
+## `nemo-progress`
+
+Print Nemo simulation speed and duration on command line:
 
 ```bash
-$ python nemo_duration.py
+nemo-progress
 ```
 
 Outputs:
 
 ```
-Run started at 2018-11-28 13:58:31
+Run directory: .
+Run started at 2019-12-05 18:17:04
 Status: Running
-Run time: 0:47:11
-Completed 3279/729600 iterations with dt=90.0 s
-Current simulation time: 3 days, 9:58:30
-Total simulation time: 760 days, 0:00:00
+Run time: 0:01:01
+Completed 25/29760 iterations with dt=90.0 s
+Current simulation time: 0:37:30
+Total simulation time: 31 days, 0:00:00
 Wallclock time for
-    one day: 0:13:49
- entire run: 7 days, 6:58:43
-Remaining wallclock time: 7 days, 6:11:32
+    one day: 0:39:02
+ entire run: 20:10:14
+Remaining wallclock time: 20:09:13
+```
+
+To inspect a run in another directory:
+
+```bash
+nemo-progress <path-to-run-dir>
+```
+
+## `compare-namelist`
+
+Compares two fortran90 namelists:
+
+```bash
+compare-namelist run_a/namelist_ref run_b/namelist_ref
+```
+
+To include Nemo cfg name lists as well
+
+```bash
+compare-namelist namelist_ref --cfg_a=namelist_cfg run_b/namelist_ref --cfg_b=run_b/namelist_cfg
 ```
